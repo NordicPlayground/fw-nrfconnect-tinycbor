@@ -32,13 +32,13 @@
 #  define __STDC_LIMIT_MACROS 1
 #endif
 
-#include "cbor.h"
-#include "cborinternal_p.h"
-#include "compilersupport_p.h"
+#include "tinycbor/cbor.h"
+#include "tinycbor/cborinternal_p.h"
+#include "tinycbor/compilersupport_p.h"
 
 #include <string.h>
 
-#include "cbor_buf_reader.h"
+#include <tinycbor/cbor_buf_reader.h>
 /**
  * \defgroup CborParsing Parsing CBOR streams
  * \brief Group of functions used to parse CBOR streams.
@@ -1293,6 +1293,7 @@ CborError _cbor_value_copy_string(const CborValue *value, void *buffer,
                                  size_t *buflen, CborValue *next)
 {
     bool copied_all;
+    size_t maxlen = *buflen;
     CborError err = iterate_string_chunks(value, (char*)buffer, buflen, &copied_all, next,
                                           buffer ? (IterateFunction) value->parser->d->cpy : iterate_noop);
     if (err) {
@@ -1303,7 +1304,7 @@ CborError _cbor_value_copy_string(const CborValue *value, void *buffer,
         return CborErrorOutOfMemory;
     }
 
-    if (buffer) {
+    if (buffer && *buflen < maxlen) {
         *((uint8_t *)buffer + *buflen) = '\0';
     }
 
